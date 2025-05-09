@@ -1,0 +1,37 @@
+version: "3"
+services:
+  webserver:
+    image: nginx
+    ports:
+      - "8080:80"
+    depends_on:
+      - app
+      - mysql
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+
+  mysql:
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: testdb
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+  app:
+    build: .
+    depends_on:
+      - mysql
+    ports:
+      - "5000:5000"
+    environment:
+      - DB_HOST=mysql
+      - DB_USER=root
+      - DB_PASSWORD=1234
+      - DB_NAME=testdb
+      - DB_PORT=3306
+
+volumes:
+  mysql-data:
